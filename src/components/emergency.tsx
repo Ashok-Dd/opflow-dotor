@@ -9,6 +9,7 @@ import type { DoctorHospital, EmergencyState } from '@/lib/types';
 
 import { Sheet, useT, useToast } from './client-kit';
 import { Icon } from './icons';
+import { OpLoadingScreen } from '@/components/op-loader';
 
 const TILL = [20, 22, 24, 6]; // 8 PM, 10 PM, 12 AM, 6 AM
 const tillLabel = (h: number) => `${h % 12 === 0 ? 12 : h % 12} ${h % 24 >= 12 ? 'PM' : 'AM'}`;
@@ -78,6 +79,7 @@ export function EmergencyButton({ state, hospitals, hospitalId }: { state: Emerg
           {label}
         </span>
       </button>
+      {pending ? <OpLoadingScreen message={t('Saving…')} /> : null}
       <Sheet open={open} onClose={() => setOpen(false)} label={t('Emergency status')}>
         <h3>{t('Emergency status')}</h3>
         <p className="lead">{t('This shows in the patient emergency screen. Please keep it true.')}</p>

@@ -10,6 +10,7 @@ import { ClockRange } from '@/components/clock';
 import { Icon } from '@/components/icons';
 import { istHour, people, rupees } from '@/lib/format';
 import type { DayBooking } from '@/lib/types';
+import { OpLoadingScreen } from '@/components/op-loader';
 
 const cap1 = (s: string) => (s ? s[0]!.toUpperCase() + s.slice(1) : s);
 
@@ -188,6 +189,7 @@ export function CancelDayButton({ date, dayText, count, refund }: { date: string
   };
   return (
     <>
+      {pending ? <OpLoadingScreen message={t('Cancelling the day…')} detail={t('Everyone gets all their money back')} /> : null}
       <button type="button" className="btn danger-outline" onClick={go} disabled={pending}>
         <Icon name="block" /> {pending ? t('Cancelling the day…') : t("I can't come on this day")}
       </button>

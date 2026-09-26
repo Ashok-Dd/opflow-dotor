@@ -9,6 +9,7 @@ import { ClockRange } from '@/components/clock';
 import { Icon } from '@/components/icons';
 import { hourLabel } from '@/lib/format';
 import type { Week, WeekBlock } from '@/lib/types';
+import { OpLoadingScreen } from '@/components/op-loader';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const hh = (h: number) => `${String(h).padStart(2, '0')}:00`;
@@ -54,6 +55,7 @@ export function WeekEditor({ initial }: { initial: Week }) {
 
   return (
     <>
+      {pending ? <OpLoadingScreen message={t('Saving your timings…')} detail={t('Patients will see the new times')} /> : null}
       <h2 className="sec">{t('Every week')}</h2>
       <div className="wk">
         {[1, 2, 3, 4, 5, 6, 7].map((wd) => {

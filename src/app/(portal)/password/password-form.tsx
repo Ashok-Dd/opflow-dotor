@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from 'react';
 
 import { changePassword } from '@/app/(portal)/actions';
 import { useT, useToast } from '@/components/client-kit';
+import { OpLoadingScreen } from '@/components/op-loader';
 
 export function PasswordForm() {
   const { t } = useT();
@@ -31,6 +32,7 @@ export function PasswordForm() {
         });
       }}
     >
+      {pending ? <OpLoadingScreen message={t('Saving…')} /> : null}
       {error ? (
         <div className="notice bad" role="alert" style={{ marginBottom: 14 }}>
           {error}

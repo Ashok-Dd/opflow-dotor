@@ -6,6 +6,7 @@ import { useT } from '@/components/client-kit';
 import type { ActionResult } from '@/lib/actions';
 
 import { setFirstPassword, signIn } from './actions';
+import { OpLoadingScreen } from '@/components/op-loader';
 
 function Result({ state }: { state: ActionResult }) {
   const { t } = useT();
@@ -25,6 +26,7 @@ export function SignInForm({ next, expired }: { next: string; expired: boolean }
   const [loginId, setLoginId] = useState('');
   return (
     <form action={run}>
+      {pending ? <OpLoadingScreen message={t('Logging in…')} /> : null}
       <h1>{t('Doctor login')}</h1>
       <p className="lead">{t('Use the OPD ID and password from the OPflow team.')}</p>
       {expired && !state ? (
@@ -76,6 +78,7 @@ export function NewPasswordForm({ next }: { next: string }) {
   const [state, run, pending] = useActionState(setFirstPassword, null);
   return (
     <form action={run}>
+      {pending ? <OpLoadingScreen message={t('Saving…')} /> : null}
       <h1>{t('Set your own password')}</h1>
       <p className="lead">{t('The password from the OPflow team works only once. Choose one only you know.')}</p>
       <Result state={state} />

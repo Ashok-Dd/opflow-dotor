@@ -20,6 +20,7 @@ const paths: Record<string, string> = {
   messages: 'M4 5h16v11H8l-4 4zM8 9h8M8 12h5',
   settings: 'M4 7h10M18 7h2M4 17h4M12 17h8M14 5v4M8 15v4',
   profile: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM5 20a7 7 0 0 1 14 0',
+  camera: 'M4 8h3l2-3h6l2 3h3v11H4zM12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z',
   hospitals: 'M4 20V8l8-4 8 4v12M9 20v-5h6v5M12 8v4M10 10h4',
   earnings: 'M3 7h18v12H3zM3 11h18M16 15h2',
   reports: 'M4 20V10M10 20V4M16 20v-7M22 20H2',

@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
 import { runAction, type ActionResult } from '@/lib/actions';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { clearSession, cookieBase, HOSPITAL, refreshToken } from '@/lib/session';
 import type { Board, BookingDetail, DayBooking, Devices, EmergencyState, Messages, Prefs, Today, Week } from '@/lib/types';
 
@@ -141,6 +141,59 @@ export async function saveProfile(body: { gender: string; yearsExperience: numbe
   });
   revalidatePath('/', 'layout');
   return r;
+}
+
+const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const PHOTO_MAX = 5 * 1024 * 1024;
+
+/**
+ * A new profile photo, the same two steps as the app: a 5-minute upload link from the API, the photo to storage,
+ * then PATCH /doctor/me { photoUploadKey }. The API makes the small / medium / large copies a moment later.
+ * The browser already made it a ~1200 px JPEG, so this stays small.
+ */
+export async function uploadPhoto(form: FormData): Promise<ActionResult> {
+  const file = form.get('photo');
+  if (!(file instanceof File) || !file.size) return { ok: false, code: 'VALIDATION', message: 'Please choose a photo.' };
+  if (!PHOTO_TYPES.includes(file.type)) return { ok: false, code: 'VALIDATION', message: 'Please choose a JPG, PNG or WebP photo.' };
+  if (file.size > PHOTO_MAX) return { ok: false, code: 'VALIDATION', message: 'This photo is too big. Please choose one under 5 MB.' };
+  return runAction(async () => {
+    const link = await api<{ key: string; url: string; headers?: Record<string, string>; maxBytes?: number }>('POST', '/v1/doctor/me/photo/upload-url', {
+      body: { contentType: file.type },
+      ...noRedirect,
+    });
+    if (link.maxBytes && file.size > link.maxBytes) throw new ApiError(413, 'VALIDATION', 'This photo is too big. Please choose a smaller one.');
+    const res = await fetch(link.url, {
+      method: 'PUT',
+      headers: link.headers ?? { 'content-type': file.type },
+      body: Buffer.from(await file.arrayBuffer()),
+      cache: 'no-store',
+      signal: AbortSignal.timeout(60_000),
+    }).catch(() => null);
+    if (!res?.ok) throw new ApiError(502, 'UPLOAD_FAILED', 'The photo could not be uploaded. Please try again.');
+    await api('PATCH', '/v1/doctor/me', { body: { photoUploadKey: link.key }, ...noRedirect });
+    return { message: 'Photo saved' };
+  });
+}
+
+export async function removePhoto(): Promise<ActionResult> {
+  const r = await runAction(async () => {
+    await api('PATCH', '/v1/doctor/me', { body: { photoUploadKey: null }, ...noRedirect });
+    return { message: 'Photo removed' };
+  });
+  revalidatePath('/', 'layout');
+  return r;
+}
+
+/** The photo the API shows now (the new one appears once its copies are made). */
+export async function currentPhoto(): Promise<ActionResult<string | null>> {
+  return runAction(async () => {
+    const me = await api<{ photo: { m?: string } | null }>('GET', '/v1/doctor/me', noRedirect);
+    return { data: me.photo?.m ?? null };
+  });
+}
+
+export async function photoDone(): Promise<void> {
+  revalidatePath('/', 'layout');
 }
 
 export async function changePassword(currentPassword: string, newPassword: string): Promise<ActionResult> {

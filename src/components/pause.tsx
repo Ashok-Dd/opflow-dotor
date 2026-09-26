@@ -7,6 +7,7 @@ import { setBookingsPaused } from '@/app/(portal)/actions';
 
 import { useConfirm, useT, useToast } from './client-kit';
 import { Icon } from './icons';
+import { OpLoadingScreen } from '@/components/op-loader';
 
 /** Pause / resume new bookings, with the app's question first and a note after (only when it really worked). */
 export function usePauseToggle(paused: boolean) {
@@ -33,7 +34,17 @@ export function usePauseToggle(paused: boolean) {
       } else if (r) toast(t(r.message), true);
     });
   };
-  return { toggle, busy, dialog };
+  const overlay = busy ? <OpLoadingScreen message={paused ? t('Opening bookings…') : t('Pausing bookings…')} /> : null;
+  return {
+    toggle,
+    busy,
+    dialog: (
+      <>
+        {dialog}
+        {overlay}
+      </>
+    ),
+  };
 }
 
 /** The "taking bookings / paused" card (Today and My timings). */

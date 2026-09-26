@@ -7,6 +7,7 @@ import { saveProfile } from '@/app/(portal)/actions';
 import { useT, useToast } from '@/components/client-kit';
 import { Icon } from '@/components/icons';
 import { rupees } from '@/lib/format';
+import { OpLoadingScreen } from '@/components/op-loader';
 
 const LANGS = ['Telugu', 'English', 'Hindi', 'Urdu', 'Tamil', 'Kannada'];
 type Form = { gender: string; yearsExperience: number; languages: string[]; about: string; feePaise: number };
@@ -56,6 +57,7 @@ export function ProfileForm({ initial }: { initial: Form }) {
 
   return (
     <div className="card">
+      {pending ? <OpLoadingScreen message={t('Saving your profile…')} detail={t('Patients will see it right away')} /> : null}
       <div className="field">
         <span>{t('Gender')}</span>
         <div className="chips">

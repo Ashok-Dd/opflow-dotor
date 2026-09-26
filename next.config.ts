@@ -9,8 +9,8 @@ const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'" + (dev ? " 'unsafe-eval'" : ''),
   "style-src 'self' 'unsafe-inline'",
-  // Doctor photos come from the storage CDN.
-  "img-src 'self' data: https:" + (dev ? ' http://localhost:3000' : ''),
+  // Doctor photos come from the storage CDN (or the API itself on a local setup); blob: is the new photo's preview.
+  `img-src 'self' data: blob: https: ${live}` + (dev ? ' http://localhost:3000' : ''),
   "font-src 'self'",
   // The live line: the API's WebSocket (and its polling fallback).
   `connect-src 'self' ${live} ${liveWs}`,
@@ -21,6 +21,8 @@ const csp = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Profile photos (already shrunk in the browser to about 1200 px) go through a Server Action.
+  experimental: { serverActions: { bodySizeLimit: '6mb' } },
   async headers() {
     return [
       {

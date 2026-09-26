@@ -8,6 +8,7 @@ import { Sheet, useT, useToast } from '@/components/client-kit';
 import { Icon } from '@/components/icons';
 import { monthName, people, weekdayOf } from '@/lib/format';
 import type { DayBooking } from '@/lib/types';
+import { OpLoadingScreen } from '@/components/op-loader';
 
 const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const ymd = (y: number, m: number, d: number) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -72,6 +73,7 @@ export function LeaveCalendar({ today, initial, workdays, booked }: { today: str
 
   return (
     <>
+      {pending && !ask ? <OpLoadingScreen message={t('Saving leave…')} /> : null}
       <div className="months">
         {months.map(({ y, m }) => {
           const first = ymd(y, m, 1);

@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 
 import { Icon } from '@/components/icons';
-import { initials } from '@/lib/format';
 import { serverT } from '@/lib/lang';
 import { portal } from '@/lib/portal';
 
+import { PhotoPicker } from './photo-picker';
 import { ProfileForm } from './profile-form';
 
 export const metadata: Metadata = { title: 'My profile' };
@@ -27,11 +27,8 @@ export default async function ProfilePage() {
           initial={{ gender: me.gender, yearsExperience: me.yearsExperience, languages: me.languages, about: me.about, feePaise: me.feePaise }}
         />
         <div className="grid">
-          <div className="card" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-            <div className="avatar" style={{ width: 84, height: 104, borderRadius: 16, fontSize: 30 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element -- doctor photos come from the storage CDN already in small fixed sizes */}
-              {me.photo?.m ? <img src={me.photo.m} alt="" /> : initials(me.name)}
-            </div>
+          <div className="card" style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
+            <PhotoPicker name={me.name} photo={me.photo?.m ?? null} />
             <div>
               <h3 style={{ margin: 0 }}>{me.name}</h3>
               <div className="muted">{t(me.typeName)}</div>
@@ -71,10 +68,6 @@ export default async function ProfilePage() {
             <p className="faint" style={{ fontSize: 13, marginBottom: 0 }}>
               {t(me.lockedNote)}
             </p>
-          </div>
-          <div className="notice">
-            <Icon name="profile" />
-            <span>{t('Profile photo: coming soon on the website. You can change it in the OPflow app.')}</span>
           </div>
         </div>
       </div>

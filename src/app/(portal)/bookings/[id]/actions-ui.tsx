@@ -6,6 +6,7 @@ import { useState, useTransition } from 'react';
 import { askNewTime, cancelBooking, opd } from '@/app/(portal)/actions';
 import { Sheet, useConfirm, useT, useToast } from '@/components/client-kit';
 import { Icon } from '@/components/icons';
+import { OpLoadingScreen } from '@/components/op-loader';
 
 const REASONS = ['I have an emergency', 'I am not well', 'Hospital is closed', 'Patient asked to cancel', 'Other reason'];
 
@@ -45,6 +46,7 @@ export function BookingActions({
 
   return (
     <div className="card grid">
+      {pending ? <OpLoadingScreen message={t('Working…')} /> : null}
       <h3 style={{ margin: 0 }}>{t('What to do')}</h3>
       {canMove ? (
         <button

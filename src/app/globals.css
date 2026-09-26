@@ -494,6 +494,59 @@ dialog.sheet-dlg p.lead { margin: 0 0 16px; color: var(--ink-soft); }
   .pt .tag { display: none; }
   .wk .d { grid-template-columns: 1fr; }
 }
+/* ── The OP loader (the app's): ring → P → heartbeat → fade, one second ──────────────────────────── */
+.op-loader path { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.op-loader .op-ring { animation: op-ring 1s cubic-bezier(0.33, 1, 0.68, 1) infinite; }
+.op-loader .op-stem { animation: op-stem 1s cubic-bezier(0.33, 1, 0.68, 1) infinite; }
+.op-loader .op-bowl { animation: op-bowl 1s cubic-bezier(0.33, 1, 0.68, 1) infinite; }
+.op-loader .op-beat { animation: op-beat 1s cubic-bezier(0.33, 1, 0.68, 1) infinite; }
+.op-loader .op-fade { animation: op-fade 1s linear infinite; }
+@keyframes op-ring { 0% { stroke-dashoffset: 1; } 38%, 100% { stroke-dashoffset: 0; } }
+@keyframes op-stem { 0%, 20% { stroke-dashoffset: 1; } 44%, 100% { stroke-dashoffset: 0; } }
+@keyframes op-bowl { 0%, 36% { stroke-dashoffset: 1; } 62%, 100% { stroke-dashoffset: 0; } }
+@keyframes op-beat { 0%, 50% { stroke-dashoffset: 1; } 84%, 100% { stroke-dashoffset: 0; } }
+@keyframes op-fade { 0%, 86% { opacity: 1; } 100% { opacity: 0; } }
+.op-panel { display: grid; place-items: center; align-content: center; gap: 14px; color: var(--ink-soft); font-weight: 500; }
+.op-screen {
+  border: 0; padding: 0; margin: auto; background: transparent; max-width: none; overflow: visible;
+  animation: op-in 0.15s ease-out;
+}
+.op-screen::backdrop { background: rgba(244, 241, 232, 0.82); animation: op-in 0.15s ease-out; }
+.op-screen:focus { outline: none; }
+.op-screen-card {
+  display: grid; justify-items: center; gap: 10px; padding: 28px 36px; min-width: 260px; text-align: center;
+  background: var(--card); border: 1px solid var(--rule-soft); border-radius: var(--r-big); box-shadow: var(--shadow-raised);
+}
+.op-screen-card b { font: 500 21px var(--serif); }
+.op-screen-card span { color: var(--ink-soft); font-size: 14px; }
+@keyframes op-in { from { opacity: 0; } }
+
+/* ── Scrollbars in OPflow green ────────────────────────────────────────────────────────────────── */
+html { scrollbar-color: var(--forest) var(--paper-deep); scrollbar-width: thin; }
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: var(--paper-deep); }
+::-webkit-scrollbar-thumb { background: var(--forest); border-radius: 10px; border: 2px solid var(--paper-deep); }
+::-webkit-scrollbar-thumb:hover { background: var(--pine); }
+.side { scrollbar-color: var(--leaf) var(--forest); }
+.side::-webkit-scrollbar-track { background: var(--forest); }
+.side::-webkit-scrollbar-thumb { background: rgba(142, 214, 166, 0.55); border-color: var(--forest); }
+.days::-webkit-scrollbar-thumb, .pop::-webkit-scrollbar-thumb { border-width: 3px; }
+
+/* ── Cards in a grid: all the same height, lined up (no stacking gap) ─────────────────────────── */
+.grid > .card + .card, .grid > * + .card { margin-top: 0; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; align-items: stretch; }
+.cards > .card { margin: 0; display: flex; flex-direction: column; height: 100%; }
+.cards > .card .grow { flex: 1; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
+  .op-loader path { stroke-dashoffset: 0; }
 }
+
+/* ── Profile photo ─────────────────────────────────────────────────────────────────────────────── */
+.photo-pick { display: grid; justify-items: center; gap: 8px; flex: none; }
+.photo-btns { display: grid; justify-items: center; gap: 2px; }
+.photo-wait { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(23, 34, 29, 0.45); border-radius: inherit; }
+.linkbtn { border: 0; background: none; padding: 4px 6px; font: inherit; font-size: 13px; color: var(--alarm); cursor: pointer; }
+.linkbtn:hover { text-decoration: underline; }
+.linkbtn:disabled { opacity: 0.5; cursor: default; }

@@ -151,8 +151,18 @@ async function patientBooks(n, windowId) {
   check('Today: START OPD and the expected patients', (await has(a, 'START OPD')) && (await has(a, 'Web Patient 1')) && (await has(a, 'Web Patient 3')));
   check('Today: OPD hours card', await has(a, 'OPD HOURS TODAY'));
   await a.screenshot({ path: 'shots/02-today-before.png' });
+  // The app's OP loader covers the screen while the OPD starts (watched from before the click: it is quick).
+  await a.evaluate(() => {
+    window.__sawLoader = '';
+    new MutationObserver(() => {
+      const d = document.querySelector('dialog.op-screen[open]');
+      if (d && !window.__sawLoader) window.__sawLoader = d.textContent + (d.querySelector('svg.op-loader') ? ' +svg' : '');
+    }).observe(document.body, { childList: true, subtree: true, attributes: true });
+  });
   await clickText(a, 'START OPD');
   check('START OPD → CALL NEXT', await waitText(a, 'CALL NEXT'));
+  const saw = await a.evaluate(() => window.__sawLoader);
+  check('START OPD shows the OP loader', saw.includes('Starting OPD') && saw.includes('+svg'), saw);
 
   // A second tab (the doctor's other screen): it must follow the line by itself.
   const b = await newPage();
@@ -304,12 +314,47 @@ async function patientBooks(n, windowId) {
   const me = (await api('GET', '/v1/doctor/me', null, phone.body.accessToken)).body;
   check('…the server has it', me.yearsExperience === years0 + 1, `${me.yearsExperience}`);
 
+  // Profile photo: a big photo is shrunk in the browser, uploaded, and the API's copy shows up.
+  const sharp = require(require.resolve('sharp', { paths: [__dirname + '/../../backend'] }));
+  const big = require('path').resolve(__dirname, '../shots/test-photo.png');
+  await sharp({ create: { width: 1800, height: 2400, channels: 3, background: { r: 31, g: 122, b: 92 } } }).png().toFile(big);
+  await a.waitForFunction(() => !document.querySelector('dialog.op-screen'), { timeout: 20_000, polling: 200 }); // the profile save has finished
+  const file = await a.$('.photo-pick input[type=file]');
+  await file.uploadFile(big);
+  const uploaded = await waitText(a, 'Photo saved', 30_000);
+  check('Photo: uploaded', uploaded, uploaded ? '' : `${await a.evaluate(() => document.querySelector('.toasts')?.textContent ?? '')} ${pageErrors.slice(-3).join(' | ')}`);
+  let photoUrl = null;
+  for (let i = 0; i < 30 && !photoUrl; i++) {
+    await sleep(1500);
+    photoUrl = (await api('GET', '/v1/doctor/me', null, phone.body.accessToken)).body.photo?.m ?? null;
+  }
+  check('Photo: the API made its copies', !!photoUrl, String(photoUrl));
+  const img = photoUrl ? await fetch(photoUrl) : null;
+  check('Photo: the copy opens', img?.status === 200 && /image/.test(img.headers.get('content-type') ?? ''), `${img?.status} ${img?.headers.get('content-type')}`);
+  await sleep(4000);
+  await go(a, '/profile');
+  check('Photo: shows on the profile', photoUrl ? (await a.$eval('.photo-pick img', (e) => e.getAttribute('src'))) === photoUrl : false);
+  await sleep(1500);
+  check('Photo: the browser really shows it (no CSP / CORP block)', await a.$eval('.photo-pick img', (e) => e.complete && e.naturalWidth > 0));
+  check('Photo: shows in the sidebar too', await a.evaluate(() => !!document.querySelector('.who .avatar img')));
+  await a.screenshot({ path: 'shots/09-photo.png' });
+  await clickText(a, 'Remove');
+  await sleep(400);
+  await clickText(a, 'Yes, remove');
+  check('Photo: removed', await waitText(a, 'Photo removed'));
+  const gone = (await api('GET', '/v1/doctor/me', null, phone.body.accessToken)).body.photo;
+  check('…the server has no photo', !gone?.m, JSON.stringify(gone));
+
   // ── 10. Every page opens without errors; phone width too ──
   await sleep(20_000); // a person's pace (the API allows 240 calls a minute per signed-in device)
   for (const path of ['/today', '/bookings', '/messages', '/timings', '/leave', '/hospitals', '/earnings', '/reports', '/profile', '/settings', '/password']) {
     await go(a, path);
     await sleep(1500);
     check(`Page ${path} opens`, !(await has(a, 'We could not load')) && !(await has(a, 'Application error')));
+    if (path === '/hospitals') {
+      const hs = await a.$$eval('.cards > .card', (els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));
+      check('Hospitals: cards are the same size', hs.length > 0 && new Set(hs).size === 1, hs.join(','));
+    }
   }
   await a.setViewport({ width: 390, height: 844, isMobile: true });
   await go(a, '/today');

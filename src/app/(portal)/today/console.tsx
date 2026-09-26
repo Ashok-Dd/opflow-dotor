@@ -8,6 +8,7 @@ import { loadToday, opd, switchHospital } from '@/app/(portal)/actions';
 import { Sheet, useT, useToast } from '@/components/client-kit';
 import { ClockRange, ClockTime } from '@/components/clock';
 import { Icon } from '@/components/icons';
+import { OpLoadingScreen } from '@/components/op-loader';
 import { PauseCard, usePauseToggle } from '@/components/pause';
 import { clockLabel, hourLabel, istHour, longDate, people } from '@/lib/format';
 import { followLine } from '@/lib/live';
@@ -63,6 +64,7 @@ export function Console({
   const [sessionId, setSessionId] = useState<string | null>(pickSession(initial.sessions)?.sessionId ?? null);
   const [connected, setConnected] = useState(false);
   const [busy, startBusy] = useTransition();
+  const [heavy, setHeavy] = useState<Cmd | null>(null); // Start / END OPD show the full loader, like the app
   const [lateOpen, setLateOpen] = useState(false);
   const [endOpen, setEndOpen] = useState(false);
   const seenEmergency = useRef(new Set(initial.sessions.flatMap((s) => s.line.filter((e) => e.emergency).map((e) => e.bookingId))));
@@ -120,6 +122,7 @@ export function Console({
     (cmd: Cmd, input: Parameters<typeof opd>[2] = {}, ok?: string) =>
       new Promise<boolean>((resolve) => {
         if (!board) return resolve(false);
+        if (cmd === 'start' || cmd === 'end') setHeavy(cmd);
         startBusy(async () => {
           const r = await opd(board.sessionId, cmd, { expectedVersion: board.version, ...input });
           if (r?.ok && r.data) {
@@ -142,7 +145,7 @@ export function Console({
           }
           resolve(false);
         });
-      }),
+      }).finally(() => setHeavy(null)),
     [board, applyBoard, toast, t, refresh, router],
   );
 
@@ -180,6 +183,13 @@ export function Console({
 
   const pause = usePauseToggle(bookingsPaused);
   const togglePause = pause.toggle;
+
+  const overlay =
+    heavy === 'start' ? (
+      <OpLoadingScreen message={t('Starting OPD…')} detail={t('Telling your patients')} />
+    ) : heavy === 'end' ? (
+      <OpLoadingScreen message={t('Ending OPD…')} />
+    ) : null;
 
   if (!board) {
     return (
@@ -274,6 +284,7 @@ export function Console({
   if (board.status === 'scheduled') {
     return (
       <>
+        {overlay}
         <Head t={t} lang={lang} date={today.date} connected={connected} />
         {sessionTabs}
         <div className="console">
@@ -309,6 +320,7 @@ export function Console({
     const count = (s: LineEntry['state']) => board.line.filter((e) => e.state === s).length;
     return (
       <>
+        {overlay}
         <Head t={t} lang={lang} date={today.date} connected={connected} />
         {sessionTabs}
         <div className="cols">
@@ -364,6 +376,7 @@ export function Console({
   const waitingCount = board.line.filter((e) => e.state === 'waiting' || e.state === 'not_come').length;
   return (
     <>
+      {overlay}
       <Head t={t} lang={lang} date={today.date} connected={connected} />
       {sessionTabs}
       <div className="console">
