@@ -1,0 +1,32 @@
+{
+  "name": "opflow-doctor-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OPflow for Doctors: the doctor's OPD console on the web. Talks only to the OPflow API's doctor routes, server-side.",
+  "scripts": {
+    "sync:te": "node scripts/sync-te.mjs",
+    "prebuild": "node scripts/sync-te.mjs",
+    "dev": "next dev -p 3003",
+    "build": "next build",
+    "start": "next start -p 3003",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "node tests/doctor.e2e.js"
+  },
+  "dependencies": {
+    "next": "16.3.6",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.6",
+    "puppeteer-core": "^25.12.0",
+    "typescript": "^5"
+  }
+}
