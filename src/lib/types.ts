@@ -165,6 +165,12 @@ export interface Earnings {
   rows: { date: string; dayLabel: string; patients: number; fees: Money; opflow: Money; yours: Money; inBank: Money; coming: Money; moneyBack: Money }[];
 }
 
+/** Bank payouts (Cashfree): one per run, covering many visits. "failed" never reached the doctor. */
+export interface Payouts {
+  bank: { last4: string | null; active: boolean } | null;
+  items: { id: string; amount: Money; visits: number; deducted: Money | null; status: 'pending' | 'success' | 'failed'; bankReference: string | null; createdAt: string; settledAt: string | null }[];
+}
+
 export interface Reports {
   days: number;
   sessions: number;

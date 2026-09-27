@@ -48,8 +48,8 @@ async function patientBooks(n, windowId) {
   await api('PATCH', '/v1/me', { name: `Web Patient ${n}`, age: 30 + n, gender: n % 2 ? 'female' : 'male' }, token);
   const hold = await api('POST', '/v1/bookings/hold', { windowId, note: n === 1 ? 'Fever for two days' : undefined }, token);
   if (hold.status !== 201) throw new Error(`hold ${n}: ${JSON.stringify(hold.body)}`);
-  const paid = await api('POST', '/v1/dev/razorpay/pay', { orderId: hold.body.payment.orderId });
-  const v = await api('POST', '/v1/payments/verify', paid.body, token);
+  await api('POST', '/v1/dev/cashfree/pay', { orderId: hold.body.payment.orderId });
+  const v = await api('POST', '/v1/payments/verify', { orderId: hold.body.payment.orderId }, token);
   if (v.body?.booking?.status !== 'confirmed') throw new Error(`verify ${n}: ${JSON.stringify(v.body)}`);
   return v.body.booking;
 }
