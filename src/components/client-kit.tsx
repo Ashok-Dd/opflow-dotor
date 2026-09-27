@@ -74,14 +74,14 @@ export function Sheet({ open, onClose, children, label }: { open: boolean; onClo
 }
 
 /** Ask "Are you sure?": resolves true when the doctor confirms. */
-export type Confirm = (title: string, text: string, yes: string, danger?: boolean) => Promise<boolean>;
+export type Confirm = (title: string, text: string, yes: string, danger?: boolean, no?: string) => Promise<boolean>;
 
 /** "Are you sure?" with the app's words; resolves true when confirmed. */
 export function useConfirm() {
-  const [ask, setAsk] = useState<{ title: string; text: string; yes: string; danger?: boolean; resolve: (ok: boolean) => void } | null>(null);
+  const [ask, setAsk] = useState<{ title: string; text: string; yes: string; danger?: boolean; no?: string; resolve: (ok: boolean) => void } | null>(null);
   const { t } = useT();
   const confirm = useCallback(
-    (title: string, text: string, yes: string, danger?: boolean) => new Promise<boolean>((resolve) => setAsk({ title, text, yes, danger, resolve })),
+    (title: string, text: string, yes: string, danger?: boolean, no?: string) => new Promise<boolean>((resolve) => setAsk({ title, text, yes, danger, no, resolve })),
     [],
   );
   const close = (ok: boolean) => {
@@ -98,7 +98,7 @@ export function useConfirm() {
           </p>
           <div className="actions" style={{ justifyContent: 'flex-end' }}>
             <button type="button" className="btn ghost" onClick={() => close(false)}>
-              {t('Not now')}
+              {ask.no ?? t('Not now')}
             </button>
             <button type="button" className={`btn${ask.danger ? ' danger' : ''}`} onClick={() => close(true)} autoFocus>
               {ask.yes}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 import { saveProfile } from '@/app/(portal)/actions';
 import { useConfirm, useT, useToast } from '@/components/client-kit';
@@ -22,6 +22,27 @@ export function ProfileForm({ initial }: { initial: Form }) {
   const [pending, start] = useTransition();
   const { confirm, dialog } = useConfirm();
   const dirty = JSON.stringify(f) !== saved;
+
+  // Unsaved changes: ask before leaving (the app asks the same when going back).
+  useEffect(() => {
+    if (!dirty) return;
+    const onUnload = (e: BeforeUnloadEvent) => e.preventDefault();
+    const onClick = async (e: MouseEvent) => {
+      const a = (e.target as Element | null)?.closest?.('a[href]') as HTMLAnchorElement | null;
+      if (!a || a.target || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const to = new URL(a.href);
+      if (to.origin !== location.origin || to.pathname === location.pathname) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (await confirm(t('Leave without saving?'), t('Your changes will be lost.'), t('Yes, leave'), false, t('Stay and save'))) router.push(to.pathname + to.search);
+    };
+    window.addEventListener('beforeunload', onUnload);
+    document.addEventListener('click', onClick, true);
+    return () => {
+      window.removeEventListener('beforeunload', onUnload);
+      document.removeEventListener('click', onClick, true);
+    };
+  }, [dirty, confirm, router, t]);
   const fee = Math.round(f.feePaise / 100);
   const opflow = Math.floor(fee / 10);
 

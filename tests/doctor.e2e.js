@@ -319,6 +319,12 @@ async function patientBooks(n, windowId) {
   await go(a, '/profile');
   const years0 = Number(await a.$eval('.card input[type=number]', (e) => e.value));
   await clickText(a, '+');
+  // Unsaved changes: leaving asks first (like the app); "Stay and save" keeps the page.
+  await clickText(a, 'My timings', 'nav a');
+  check('Profile: leaving with unsaved changes asks first', await waitText(a, 'Leave without saving?'));
+  await yes(a, 'Stay and save');
+  await sleep(600);
+  check('…"Stay and save" keeps the changes', a.url().includes('/profile') && (await has(a, 'Not saved yet')));
   await clickText(a, 'Save');
   check('Profile: save', await waitText(a, 'Profile saved'));
   const me = (await api('GET', '/v1/doctor/me', null, phone.body.accessToken)).body;

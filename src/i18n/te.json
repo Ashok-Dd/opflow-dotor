@@ -912,5 +912,22 @@
  "Emergency status saved": "ఎమర్జెన్సీ స్టేటస్ సేవ్ అయింది",
  "The doctor cannot see you at this time. Pick any other time with the same doctor, free of cost. If you do not pick one within 48 hours, all your money comes back.": "ఈ సమయంలో డాక్టర్ మిమ్మల్ని చూడలేరు. అదే డాక్టర్‌తో వేరే ఏ సమయమైనా ఉచితంగా ఎంచుకోండి. 48 గంటల్లో ఎంచుకోకపోతే, మీ పూర్తి డబ్బు తిరిగి వస్తుంది.",
  "Your visit is done.": "మీ విజిట్ పూర్తయింది.",
- "You were marked as not come. Please tell the hospital desk so you are put back in line.": "మీరు రాలేదు అని గుర్తించారు. మిమ్మల్ని మళ్లీ లైన్‌లో పెట్టడానికి హాస్పిటల్ డెస్క్‌కు చెప్పండి."
+ "You were marked as not come. Please tell the hospital desk so you are put back in line.": "మీరు రాలేదు అని గుర్తించారు. మిమ్మల్ని మళ్లీ లైన్‌లో పెట్టడానికి హాస్పిటల్ డెస్క్‌కు చెప్పండి.",
+ "Start OPD now?": "ఇప్పుడు OPD మొదలుపెట్టాలా?",
+ "Patients will see \"Doctor has started\" and the live line.": "పేషెంట్లకు \"డాక్టర్ మొదలుపెట్టారు\" అని, లైవ్ లైన్ కనిపిస్తాయి.",
+ "Yes, start OPD": "అవును, OPD మొదలుపెట్టండి",
+ "{0} marked as did not come": "{0} రాలేదు అని గుర్తించాం",
+ "Cancel {0}?": "{0} ని రద్దు చేయాలా?",
+ "Their bookings are cancelled and everyone gets all their money back. This cannot be undone.": "వారి బుకింగ్‌లు రద్దవుతాయి, అందరికీ మొత్తం డబ్బు వాపసు వస్తుంది. దీన్ని వెనక్కి తీసుకోలేరు.",
+ "Yes, cancel and refund": "అవును, రద్దు చేసి డబ్బు వాపసు ఇవ్వండి",
+ "Save your new timings?": "మీ కొత్త టైమింగ్స్ సేవ్ చేయాలా?",
+ "Patients will see the new times and can book them. Bookings already made stay the same.": "పేషెంట్లకు కొత్త టైమింగ్స్ కనిపిస్తాయి, బుక్ చేసుకోవచ్చు. ఇప్పటికే చేసిన బుకింగ్‌లు మారవు.",
+ "Yes, save": "అవును, సేవ్ చేయండి",
+ "Save your leave?": "మీ సెలవు సేవ్ చేయాలా?",
+ "Patients cannot book you on your leave days. If someone already booked, we ask you what to do next.": "సెలవు రోజుల్లో పేషెంట్లు మిమ్మల్ని బుక్ చేయలేరు. ఎవరైనా ఇప్పటికే బుక్ చేసి ఉంటే, ఏం చేయాలో మిమ్మల్ని అడుగుతాం.",
+ "Change your fee to {0}?": "మీ ఫీజు {0} కి మార్చాలా?",
+ "New bookings pay {0}. Bookings already made stay at {1}.": "కొత్త బుకింగ్‌లకు {0}. ఇప్పటికే చేసిన బుకింగ్‌లు {1} గానే ఉంటాయి.",
+ "Yes, change fee": "అవును, ఫీజు మార్చండి",
+ "Change your password?": "మీ పాస్‌వర్డ్ మార్చాలా?",
+ "Your other phones and browsers will be logged out. Use the new password there.": "మీ ఇతర ఫోన్లు, బ్రౌజర్ల నుంచి లాగ్ అవుట్ అవుతుంది. అక్కడ కొత్త పాస్‌వర్డ్ వాడండి."
 }
