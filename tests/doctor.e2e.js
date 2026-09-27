@@ -85,7 +85,7 @@ async function patientBooks(n, windowId) {
     await p.setViewport({ width: 1440, height: 900 });
     p.on('pageerror', (e) => pageErrors.push(e.message));
     p.on('console', (m) => {
-      if (m.type() === 'error' && !/favicon|Failed to load resource/.test(m.text())) pageErrors.push(m.text() + ' @ ' + (m.location()?.url ?? ''));
+      if (m.type() === 'error' && !/favicon|Failed to load resource/.test(m.text())) { pageErrors.push(m.text() + ' @ ' + (m.location()?.url ?? '')); if (process.env.SHOW_ERRORS) console.log('   !! browser error:', m.text().slice(0, 120), '@', p.url()); }
     });
     return p;
   };

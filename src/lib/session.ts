@@ -12,6 +12,8 @@ export const REFRESH = 'opfd_rt';
 export const CHANGE = 'opfd_ct';
 /** The hospital the doctor is looking at (a doctor may work at more than one). */
 export const HOSPITAL = 'opfd_h';
+/** A random id for this browser (kept after log out): the API knows it is the same browser signing in again. */
+export const BROWSER = 'opfd_did';
 export const LANG = 'opf_lang';
 
 export const secure = process.env.NODE_ENV === 'production';
