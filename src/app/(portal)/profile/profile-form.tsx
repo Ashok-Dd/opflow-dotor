@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { saveProfile } from '@/app/(portal)/actions';
-import { useT, useToast } from '@/components/client-kit';
+import { useConfirm, useT, useToast } from '@/components/client-kit';
 import { Icon } from '@/components/icons';
 import { rupees } from '@/lib/format';
 import { OpLoadingScreen } from '@/components/op-loader';
@@ -20,11 +20,22 @@ export function ProfileForm({ initial }: { initial: Form }) {
   const [f, setF] = useState(initial);
   const [saved, setSaved] = useState(JSON.stringify(initial));
   const [pending, start] = useTransition();
+  const { confirm, dialog } = useConfirm();
   const dirty = JSON.stringify(f) !== saved;
   const fee = Math.round(f.feePaise / 100);
   const opflow = Math.floor(fee / 10);
 
-  const save = () =>
+  const save = async () => {
+    const oldFee = (JSON.parse(saved) as Form).feePaise;
+    if (
+      f.feePaise !== oldFee &&
+      !(await confirm(
+        t('Change your fee to {0}?', [rupees(f.feePaise)]),
+        t('New bookings pay {0}. Bookings already made stay at {1}.', [rupees(f.feePaise), rupees(oldFee)]),
+        t('Yes, change fee'),
+      ))
+    )
+      return;
     start(async () => {
       const r = await saveProfile(f);
       if (r?.ok) {
@@ -33,6 +44,7 @@ export function ProfileForm({ initial }: { initial: Form }) {
         router.refresh();
       } else if (r) toast(t(r.message), true);
     });
+  };
 
   const stepper = (value: number, set: (v: number) => void, min: number, max: number, step: number, unit: string) => (
     <div className="actions" style={{ gap: 6 }}>
@@ -117,6 +129,7 @@ export function ProfileForm({ initial }: { initial: Form }) {
           <Icon name="check" /> {pending ? t('Saving your profile…') : t('Save')}
         </button>
       </div>
+      {dialog}
     </div>
   );
 }

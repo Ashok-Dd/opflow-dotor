@@ -2,15 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, useTransition, type ReactNode } from 'react';
 
 import { inbox, signOut, switchHospital } from '@/app/(portal)/actions';
 import type { DoctorHospital, EmergencyState, Message } from '@/lib/types';
 
-import { useT } from './client-kit';
+import { useConfirm, useT } from './client-kit';
 import { EmergencyButton } from './emergency';
 import { Icon, OpMark, type IconName } from './icons';
 import { LangToggle } from './lang-toggle';
+import { OpLoadingScreen } from './op-loader';
 
 const NAV: { title: string; items: { href: string; label: string; icon: IconName }[] }[] = [
   {
@@ -153,9 +154,7 @@ export function Shell({
             <b>{doctor.name}</b>
             <span>{doctor.loginId}</span>
           </div>
-          <form action={signOut}>
-            <button type="submit">{t('Log out')}</button>
-          </form>
+          <LogOut />
         </div>
       </aside>
       <div className="scrim" onClick={() => setOpenOn(null)} aria-hidden="true" />
@@ -221,5 +220,27 @@ export function Shell({
         <main className="sheet">{children}</main>
       </div>
     </div>
+  );
+}
+
+/** Log out, after asking (the same words as the app). */
+function LogOut() {
+  const { t } = useT();
+  const { confirm, dialog } = useConfirm();
+  const [pending, start] = useTransition();
+  return (
+    <>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={async () => {
+          if (await confirm(t('Log out?'), t('You will need your Doctor ID and password to log in again.'), t('Yes, log out'), true)) start(() => signOut());
+        }}
+      >
+        {t('Log out')}
+      </button>
+      {pending ? <OpLoadingScreen message={t('Logging out…')} /> : null}
+      {dialog}
+    </>
   );
 }

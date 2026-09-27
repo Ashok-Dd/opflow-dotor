@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 
 import { loadToday, opd, switchHospital } from '@/app/(portal)/actions';
-import { Sheet, useT, useToast } from '@/components/client-kit';
+import { Sheet, useConfirm, useT, useToast, type Confirm } from '@/components/client-kit';
 import { ClockRange, ClockTime } from '@/components/clock';
 import { Icon } from '@/components/icons';
 import { OpLoadingScreen } from '@/components/op-loader';
@@ -64,6 +64,7 @@ export function Console({
   const [sessionId, setSessionId] = useState<string | null>(pickSession(initial.sessions)?.sessionId ?? null);
   const [connected, setConnected] = useState(false);
   const [busy, startBusy] = useTransition();
+  const { confirm, dialog: confirmDialog } = useConfirm();
   const [heavy, setHeavy] = useState<Cmd | null>(null); // Start / END OPD show the full loader, like the app
   const [lateOpen, setLateOpen] = useState(false);
   const [endOpen, setEndOpen] = useState(false);
@@ -190,6 +191,12 @@ export function Console({
     ) : heavy === 'end' ? (
       <OpLoadingScreen message={t('Ending OPD…')} />
     ) : null;
+  const layers = (
+    <>
+      {overlay}
+      {confirmDialog}
+    </>
+  );
 
   if (!board) {
     return (
@@ -252,7 +259,7 @@ export function Console({
           </div>
           <div className="line">
             {emergencies.map((e) => (
-              <Row key={e.bookingId} e={e} compact={compact} running={running} send={send} />
+              <Row key={e.bookingId} e={e} compact={compact} running={running} send={send} confirm={confirm} />
             ))}
           </div>
         </>
@@ -271,7 +278,7 @@ export function Console({
             </div>
             <div className="line">
               {inHour.map((e) => (
-                <Row key={e.bookingId} e={e} compact={compact} running={running} send={send} />
+                <Row key={e.bookingId} e={e} compact={compact} running={running} send={send} confirm={confirm} />
               ))}
             </div>
           </div>
@@ -284,7 +291,7 @@ export function Console({
   if (board.status === 'scheduled') {
     return (
       <>
-        {overlay}
+        {layers}
         <Head t={t} lang={lang} date={today.date} connected={connected} />
         {sessionTabs}
         <div className="console">
@@ -295,7 +302,10 @@ export function Console({
             {board.line.filter((e) => e.state !== 'cancelled' && e.state !== 'moved').length === 0 ? <NoOneYet paused={bookingsPaused} /> : lineList(true)}
           </div>
           <div className="rail">
-            <button type="button" className="callnext" disabled={busy} onClick={() => void send('start', {}, t('OPD started. Patients are told.'))}>
+            <button type="button" className="callnext" disabled={busy} onClick={async () => {
+                if (await confirm(t('Start OPD now?'), t('Patients will see "Doctor has started" and the live line.'), t('Yes, start OPD')))
+                  void send('start', {}, t('OPD started. Patients are told.'));
+              }}>
               <Icon name="play" size={30} />
               <div>
                 <b>{t('START OPD')}</b>
@@ -320,7 +330,7 @@ export function Console({
     const count = (s: LineEntry['state']) => board.line.filter((e) => e.state === s).length;
     return (
       <>
-        {overlay}
+        {layers}
         <Head t={t} lang={lang} date={today.date} connected={connected} />
         {sessionTabs}
         <div className="cols">
@@ -376,7 +386,7 @@ export function Console({
   const waitingCount = board.line.filter((e) => e.state === 'waiting' || e.state === 'not_come').length;
   return (
     <>
-      {overlay}
+      {layers}
       <Head t={t} lang={lang} date={today.date} connected={connected} />
       {sessionTabs}
       <div className="console">
@@ -449,7 +459,10 @@ export function Console({
                 <button type="button" className="btn" disabled={busy} onClick={() => void send('done', {}, t('Done'))}>
                   <Icon name="check" /> {t('Done')} <kbd>D</kbd>
                 </button>
-                <button type="button" className="btn danger-outline" disabled={busy} onClick={() => void send('did-not-come', { bookingId: current.bookingId }, t('{0} marked as did not come', [current.name]))}>
+                <button type="button" className="btn danger-outline" disabled={busy} onClick={async () => {
+                  if (await confirm(t('Mark {0} as did not come?', [current.name]), t('Use this only when the patient did not come. You can put them back in the line later.'), t('Yes, did not come'), true))
+                    void send('did-not-come', { bookingId: current.bookingId }, t('{0} marked as did not come', [current.name]));
+                }}>
                   <Icon name="userx" /> {t('Did not come')}
                 </button>
                 <button type="button" className="btn ghost" disabled={busy} onClick={() => void send('skip', { bookingId: current.bookingId }, t('Moved to the end of the line'))}>
@@ -539,7 +552,7 @@ export function Console({
         </div>
       </Sheet>
 
-      <EndSheet open={endOpen} onClose={() => setEndOpen(false)} left={waitingCount} busy={busy} onEnd={async (leftovers) => {
+      <EndSheet open={endOpen} onClose={() => setEndOpen(false)} left={waitingCount} busy={busy} confirm={confirm} onEnd={async (leftovers) => {
         if (await send('end', { leftovers }, t('OPD is over'))) setEndOpen(false);
       }} />
       {pause.dialog}
@@ -684,7 +697,19 @@ function Shortcuts() {
 }
 
 /** One patient in the line, with what the doctor can do for them (the app's per-patient sheet). */
-function Row({ e, compact, running, send }: { e: LineEntry; compact: boolean; running: boolean; send: (cmd: Cmd, input?: Parameters<typeof opd>[2], ok?: string) => Promise<boolean> }) {
+function Row({
+  e,
+  compact,
+  running,
+  send,
+  confirm,
+}: {
+  e: LineEntry;
+  compact: boolean;
+  running: boolean;
+  send: (cmd: Cmd, input?: Parameters<typeof opd>[2], ok?: string) => Promise<boolean>;
+  confirm: Confirm;
+}) {
   const { t } = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -703,8 +728,12 @@ function Row({ e, compact, running, send }: { e: LineEntry; compact: boolean; ru
     e.state === 'not_come' ? { icon: 'reached' as const, label: t('Mark reached'), run: () => act('mark-reached', t('{0} marked as reached', [e.name])) } : null,
     (e.state === 'waiting' || e.state === 'not_come') && running ? { icon: 'megaphone' as const, label: t('Call in now'), run: () => act('call-now', t('Calling token {0}', [e.tokenLabel])) } : null,
     e.state === 'did_not_come' || e.state === 'done' ? { icon: 'undo' as const, label: t('Put back in line'), run: () => act('put-back', t('{0} is back in the line', [e.name])) } : null,
-    (e.state === 'waiting' || e.state === 'not_come') && running ? { icon: 'userx' as const, label: t('Did not come'), danger: true, run: () => act('did-not-come', t('{0} marked as did not come', [e.name])) } : null,
-  ].filter(Boolean) as { icon: 'reached'; label: string; danger?: boolean; run: () => void }[];
+    (e.state === 'waiting' || e.state === 'not_come') && running ? { icon: 'userx' as const, label: t('Did not come'), danger: true, run: async () => {
+          setOpen(false);
+          if (await confirm(t('Mark {0} as did not come?', [e.name]), t('Use this only when the patient did not come. You can put them back in the line later.'), t('Yes, did not come'), true))
+            await act('did-not-come', t('{0} marked as did not come', [e.name]));
+        } } : null,
+  ].filter(Boolean) as { icon: 'reached'; label: string; danger?: boolean; run: () => void | Promise<void> }[];
   return (
     <div className={`pt${e.state === 'with_doctor' ? ' with' : ''}${faded ? ' faded' : ''}`}>
       <div className={`tk${e.emergency && e.state !== 'with_doctor' ? ' em' : ''}`}>{e.tokenLabel}</div>
@@ -742,7 +771,21 @@ function Row({ e, compact, running, send }: { e: LineEntry; compact: boolean; ru
 }
 
 /** END OPD: confirm, then what to do for people still in the line (move them, or cancel with money back). */
-function EndSheet({ open, onClose, left, busy, onEnd }: { open: boolean; onClose: () => void; left: number; busy: boolean; onEnd: (leftovers: 'move' | 'cancel') => void }) {
+function EndSheet({
+  open,
+  onClose,
+  left,
+  busy,
+  onEnd,
+  confirm,
+}: {
+  open: boolean;
+  onClose: () => void;
+  left: number;
+  busy: boolean;
+  onEnd: (leftovers: 'move' | 'cancel') => void;
+  confirm: Confirm;
+}) {
   const { t, lang } = useT();
   return (
     <Sheet open={open} onClose={onClose} label={t("End today's OPD?")}>
@@ -756,7 +799,15 @@ function EndSheet({ open, onClose, left, busy, onEnd }: { open: boolean; onClose
             <button type="button" className="btn" disabled={busy} onClick={() => onEnd('move')}>
               <Icon name="repeat" /> {t('Move them to another day')}
             </button>
-            <button type="button" className="btn danger-outline" disabled={busy} onClick={() => onEnd('cancel')}>
+            <button
+              type="button"
+              className="btn danger-outline"
+              disabled={busy}
+              onClick={async () => {
+                if (await confirm(t('Cancel {0}?', [people(lang, left)]), t('Their bookings are cancelled and everyone gets all their money back. This cannot be undone.'), t('Yes, cancel and refund'), true))
+                  onEnd('cancel');
+              }}
+            >
               {t('Cancel and give money back')}
             </button>
             <button type="button" className="btn ghost" onClick={onClose}>

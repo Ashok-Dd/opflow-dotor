@@ -73,6 +73,9 @@ export function Sheet({ open, onClose, children, label }: { open: boolean; onClo
   );
 }
 
+/** Ask "Are you sure?": resolves true when the doctor confirms. */
+export type Confirm = (title: string, text: string, yes: string, danger?: boolean) => Promise<boolean>;
+
 /** "Are you sure?" with the app's words; resolves true when confirmed. */
 export function useConfirm() {
   const [ask, setAsk] = useState<{ title: string; text: string; yes: string; danger?: boolean; resolve: (ok: boolean) => void } | null>(null);

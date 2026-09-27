@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { saveWeek } from '@/app/(portal)/actions';
-import { useT, useToast } from '@/components/client-kit';
+import { useConfirm, useT, useToast } from '@/components/client-kit';
 import { ClockRange } from '@/components/clock';
 import { Icon } from '@/components/icons';
 import { hourLabel } from '@/lib/format';
@@ -25,6 +25,7 @@ export function WeekEditor({ initial }: { initial: Week }) {
   const [week, setWeek] = useState(() => clone(initial));
   const [saved, setSaved] = useState(() => JSON.stringify(initial));
   const [pending, start] = useTransition();
+  const { confirm, dialog } = useConfirm();
   const dirty = JSON.stringify(week) !== saved;
 
   const day = (wd: number) => week.days.find((d) => d.weekday === wd)!;
@@ -42,7 +43,8 @@ export function WeekEditor({ initial }: { initial: Week }) {
       return { ...w, days: w.days.map((d) => (d.weekday >= 2 && d.weekday <= 6 ? { ...d, blocks: mon.map((b) => ({ ...b })) } : d)) };
     });
 
-  const save = () =>
+  const save = async () => {
+    if (!(await confirm(t('Save your new timings?'), t('Patients will see the new times and can book them. Bookings already made stay the same.'), t('Yes, save')))) return;
     start(async () => {
       const r = await saveWeek({ hospitalId: week.hospitalId, openDaysAhead: week.openDaysAhead, days: week.days });
       if (r?.ok && r.data) {
@@ -52,10 +54,12 @@ export function WeekEditor({ initial }: { initial: Week }) {
         router.refresh();
       } else if (r && !r.ok) toast(t(r.message), true);
     });
+  };
 
   return (
     <>
       {pending ? <OpLoadingScreen message={t('Saving your timings…')} detail={t('Patients will see the new times')} /> : null}
+      {dialog}
       <h2 className="sec">{t('Every week')}</h2>
       <div className="wk">
         {[1, 2, 3, 4, 5, 6, 7].map((wd) => {

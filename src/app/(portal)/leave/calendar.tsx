@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { askNewTime, bookingsOn, cancelDay, saveLeaves } from '@/app/(portal)/actions';
-import { Sheet, useT, useToast } from '@/components/client-kit';
+import { Sheet, useConfirm, useT, useToast } from '@/components/client-kit';
 import { Icon } from '@/components/icons';
 import { monthName, people, weekdayOf } from '@/lib/format';
 import type { DayBooking } from '@/lib/types';
@@ -19,6 +19,7 @@ export function LeaveCalendar({ today, initial, workdays, booked }: { today: str
   const router = useRouter();
   const [days, setDays] = useState(() => new Set(initial));
   const [pending, start] = useTransition();
+  const { confirm, dialog } = useConfirm();
   const [ask, setAsk] = useState<{ open: DayBooking[]; resolve: (c: 'move' | 'cancel' | null) => void } | null>(null);
   const y0 = Number(today.slice(0, 4));
   const m0 = Number(today.slice(5, 7)) - 1;
@@ -33,7 +34,15 @@ export function LeaveCalendar({ today, initial, workdays, booked }: { today: str
       return n;
     });
 
-  const save = () =>
+  const save = async () => {
+    if (
+      !(await confirm(
+        t('Save your leave?'),
+        t('Patients cannot book you on your leave days. If someone already booked, we ask you what to do next.'),
+        t('Yes, save'),
+      ))
+    )
+      return;
     start(async () => {
       const added = future.filter((d) => !initial.includes(d));
       // Wait for each new day's real bookings: a day still loading must never look empty.
@@ -70,6 +79,7 @@ export function LeaveCalendar({ today, initial, workdays, booked }: { today: str
         router.refresh();
       } else if (r) toast(t(r.message), true);
     });
+  };
 
   return (
     <>
@@ -133,6 +143,7 @@ export function LeaveCalendar({ today, initial, workdays, booked }: { today: str
         </button>
       </div>
 
+      {dialog}
       <Sheet open={!!ask} onClose={() => ask?.resolve(null)} label={t('What should we do for them?')}>
         {ask ? (
           <>

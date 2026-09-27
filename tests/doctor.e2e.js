@@ -123,6 +123,8 @@ async function patientBooks(n, windowId) {
     await sleep(250);
   };
 
+  // Answer an "Are you sure?" question.
+  const yes = (p, label) => clickText(p, label, 'dialog[open] button');
   const a = await newPage();
   // ── 1. Sign in (first time: set own password) ──
   await go(a, '/today');
@@ -160,6 +162,8 @@ async function patientBooks(n, windowId) {
     }).observe(document.body, { childList: true, subtree: true, attributes: true });
   });
   await clickText(a, 'START OPD');
+  check('START OPD asks first', await waitText(a, 'Start OPD now?'));
+  await yes(a, 'Yes, start OPD');
   check('START OPD → CALL NEXT', await waitText(a, 'CALL NEXT'));
   const saw = await a.evaluate(() => window.__sawLoader);
   check('START OPD shows the OP loader', saw.includes('Starting OPD') && saw.includes('+svg'), saw);
@@ -190,6 +194,8 @@ async function patientBooks(n, windowId) {
   await pressWhenFree(a, 'n');
   await a.waitForFunction(() => !!document.querySelector('.now-card'), { timeout: 15_000, polling: 200 });
   await clickText(a, 'Did not come', '.now-card button');
+  check('Did not come asks first', await waitText(a, 'as did not come?'));
+  await yes(a, 'Yes, did not come');
   check('Did not come', await waitText(a, 'marked as did not come'));
   // Put back via the line's menu (the patient marked did not come).
   const put = await a.evaluate(() => {
@@ -254,6 +260,8 @@ async function patientBooks(n, windowId) {
   const cur = await a.$eval('.wk .d:first-child select[name=perHour]', (e) => e.value);
   await a.select('.wk .d:first-child select[name=perHour]', cur === '6' ? '7' : '6');
   await clickText(a, 'Save');
+  check('Timings: asks first', await waitText(a, 'Save your new timings?'));
+  await yes(a, 'Yes, save');
   check('Timings: save', await waitText(a, 'Saved'));
   const leaveDay = istDate(20);
   await go(a, '/leave');
@@ -263,6 +271,8 @@ async function patientBooks(n, windowId) {
     return !!btn;
   }, leaveDay);
   await clickText(a, 'Save leave');
+  check('Leave: asks first', await waitText(a, 'Save your leave?'));
+  await yes(a, 'Yes, save');
   check('Leave: save a day', clicked && (await waitText(a, 'Leave saved')));
   const leaves = (await api('GET', '/v1/doctor/leaves', null, phone.body.accessToken)).body;
   check('…the server has it', Array.isArray(leaves) && leaves.some((l) => String(l.date).startsWith(leaveDay)));
@@ -378,9 +388,17 @@ async function patientBooks(n, windowId) {
   await a.type('input[name=next]', 'Desk-Doctor-2027');
   await a.type('input[name=again]', 'Desk-Doctor-2027');
   await clickText(a, 'Change password', 'form button'); // the form's button, not the menu link of the same name
+  check('Change password asks first', await waitText(a, 'Change your password?'));
+  await yes(a, 'Yes, change it');
   check('Change password', await waitText(a, 'Password changed'));
   await go(a, '/today');
   await clickText(a, 'Log out');
+  check('Log out asks first', await waitText(a, 'Log out?'));
+  await yes(a, 'Not now');
+  await sleep(500);
+  check('…"Not now" keeps the doctor signed in', a.url().includes('/today') && !(await has(a, 'Log out?')));
+  await clickText(a, 'Log out');
+  await yes(a, 'Yes, log out');
   check('Log out → login page', await waitUrl(a, '/sign-in'));
   await go(a, '/today');
   check('After log out, pages need login again', a.url().includes('/sign-in'));

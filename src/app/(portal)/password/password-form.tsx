@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from 'react';
 
 import { changePassword } from '@/app/(portal)/actions';
-import { useT, useToast } from '@/components/client-kit';
+import { useConfirm, useT, useToast } from '@/components/client-kit';
 import { OpLoadingScreen } from '@/components/op-loader';
 
 export function PasswordForm() {
@@ -11,18 +11,20 @@ export function PasswordForm() {
   const toast = useToast();
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const { confirm, dialog } = useConfirm();
   const form = useRef<HTMLFormElement>(null);
   return (
     <form
       ref={form}
       className="card"
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
         const f = new FormData(e.currentTarget);
         const current = String(f.get('current') ?? '');
         const next = String(f.get('next') ?? '');
         if (next !== String(f.get('again') ?? '')) return setError(t('The two passwords are not the same.'));
         setError(null);
+        if (!(await confirm(t('Change your password?'), t('Your other phones and browsers will be logged out. Use the new password there.'), t('Yes, change it')))) return;
         start(async () => {
           const r = await changePassword(current, next);
           if (r?.ok) {
@@ -52,6 +54,7 @@ export function PasswordForm() {
         <span>{t('Type it again')}</span>
         <input name="again" type="password" required minLength={8} autoComplete="new-password" />
       </label>
+      {dialog}
       <button className="btn" disabled={pending}>
         {pending ? t('Saving…') : t('Change password')}
       </button>
