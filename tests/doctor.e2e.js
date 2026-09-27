@@ -398,8 +398,18 @@ async function patientBooks(n, windowId) {
   await yes(a, 'Yes, change it');
   check('Change password', await waitText(a, 'Password changed'));
   await go(a, '/today');
+  const lb = await a.$eval('.who .logout', (b) => { const r = b.getBoundingClientRect(); const w = b.closest('.who').getBoundingClientRect(); return { h: r.height, full: Math.abs(r.width - (w.width - 24)) < 2 }; });
+  check('Sidebar: Log out is one line, full width', lb.h < 40 && lb.full, JSON.stringify(lb));
+  await a.screenshot({ path: 'shots/10-sidebar.png', clip: { x: 0, y: 740, width: 248, height: 160 } });
   await clickText(a, 'Log out');
   check('Log out asks first', await waitText(a, 'Log out?'));
+  await sleep(400);
+  await a.screenshot({ path: 'shots/10-logout-ask.png' });
+  check('Log out question: both buttons readable', await a.evaluate(() => {
+    const bs = [...document.querySelectorAll('dialog[open] button')];
+    const ok = (b) => { const c = getComputedStyle(b); return c.opacity === '1' && c.color !== c.backgroundColor && b.getBoundingClientRect().height < 60; };
+    return bs.length === 2 && bs.every(ok) && getComputedStyle(bs[1]).backgroundColor === 'rgb(196, 41, 29)';
+  }));
   await yes(a, 'Not now');
   await sleep(500);
   check('…"Not now" keeps the doctor signed in', a.url().includes('/today') && !(await has(a, 'Log out?')));

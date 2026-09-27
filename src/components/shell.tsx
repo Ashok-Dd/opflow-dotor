@@ -232,6 +232,7 @@ function LogOut() {
     <>
       <button
         type="button"
+        className="logout"
         disabled={pending}
         onClick={async () => {
           if (await confirm(t('Log out?'), t('You will need your Doctor ID and password to log in again.'), t('Yes, log out'), true)) start(() => signOut());

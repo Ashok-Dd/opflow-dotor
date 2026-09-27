@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+
+import { useInBrowser } from './client-kit';
 
 /**
  * The OPflow loader, the same as the app's (op_loader.dart): a one-second loop — the O ring draws, the P follows,
@@ -37,18 +40,22 @@ export function OpLoadingPanel({ text, height = 260 }: { text: string; height?: 
  */
 export function OpLoadingScreen({ message, detail }: { message: string; detail?: string }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const inBrowser = useInBrowser();
   useEffect(() => {
     const d = ref.current;
     if (d && !d.open) d.showModal();
     return () => d?.close();
-  }, []);
-  return (
+  }, [inBrowser]);
+  if (!inBrowser) return null;
+  // Drawn into <body>: nothing around it can change its look.
+  return createPortal(
     <dialog ref={ref} className="op-screen" aria-busy="true" aria-label={message} onCancel={(e) => e.preventDefault()}>
       <div className="op-screen-card" role="status" aria-live="polite">
         <OpLoader size={72} />
         <b>{message}</b>
         {detail ? <span>{detail}</span> : null}
       </div>
-    </dialog>
+    </dialog>,
+    document.body,
   );
 }

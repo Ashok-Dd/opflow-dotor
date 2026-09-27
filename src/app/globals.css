@@ -88,12 +88,12 @@ button { font: inherit; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 .side .who b { display: block; color: #fff; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .side .who span { display: block; color: #bfd8cc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 11px; }
-.side .who form { grid-column: 1 / -1; }
-.side .who button {
-  margin-top: 6px; width: 100%; background: transparent; border: 1px solid rgba(255, 255, 255, 0.25); color: #e2ede6;
+.side .who .logout {
+  grid-column: 1 / -1; margin-top: 6px; width: 100%; background: transparent; border: 1px solid rgba(255, 255, 255, 0.25); color: #e2ede6;
   padding: 7px 10px; border-radius: var(--r-sm); font: 500 13px var(--sans); cursor: pointer;
 }
-.side .who button:hover { border-color: var(--leaf); color: #fff; }
+.side .who .logout:hover { border-color: var(--leaf); color: #fff; }
+.side .who .logout:disabled { opacity: 0.6; cursor: default; }
 .side .close { display: none; }
 
 /* The dimmed layer behind the phone menu: only on small screens (on a desk it must not take a grid place). */

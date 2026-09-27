@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 import { translator, type Lang, type T } from '@/lib/i18n';
 
@@ -50,15 +51,25 @@ export const useToast = () => useContext(ToastCtx);
 
 // ── Dialog: the website's version of the app's bottom sheets ─────────────────────────────────────────
 
+const noSubscribe = () => () => undefined;
+/** True in the browser (after hydration), false on the server. */
+export const useInBrowser = () => useSyncExternalStore(noSubscribe, () => true, () => false);
+
+/**
+ * A modal sheet. It is drawn straight into <body>, so no surrounding styles (sidebar, cards, tables) can change
+ * how it looks, wherever it is used.
+ */
 export function Sheet({ open, onClose, children, label }: { open: boolean; onClose: () => void; children: ReactNode; label: string }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const inBrowser = useInBrowser();
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
     if (open && !d.open) d.showModal();
     if (!open && d.open) d.close();
-  }, [open]);
-  return (
+  }, [open, inBrowser]);
+  if (!inBrowser) return null;
+  return createPortal(
     <dialog
       ref={ref}
       className="sheet-dlg"
@@ -69,7 +80,8 @@ export function Sheet({ open, onClose, children, label }: { open: boolean; onClo
       }}
     >
       {open ? <div className="in">{children}</div> : null}
-    </dialog>
+    </dialog>,
+    document.body,
   );
 }
 
