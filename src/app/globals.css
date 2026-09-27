@@ -190,6 +190,17 @@ input, select, textarea {
   font: inherit; color: var(--ink); background: #fff; border: 1px solid var(--rule); border-radius: var(--r-ctl);
   padding: 11px 13px; width: 100%; transition: border-color 0.15s, box-shadow 0.15s;
 }
+/* Password box with Show / Hide inside it, centred on the right. */
+.pw { position: relative; }
+.pw input { padding-right: 84px; }
+.pw .pw-toggle {
+  position: absolute; top: 50%; right: 7px; transform: translateY(-50%); margin: 0; width: auto;
+  height: calc(100% - 14px); min-width: 64px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center;
+  font: 600 13px var(--sans); color: var(--forest); background: var(--mint-soft); border: 0; border-radius: 8px; cursor: pointer;
+  box-shadow: none; transition: background 0.15s;
+}
+.pw .pw-toggle:hover { background: var(--mint); }
+.pw .pw-toggle:focus-visible { outline: 2px solid var(--fern); outline-offset: 1px; }
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--fern); box-shadow: 0 0 0 3px rgba(26, 111, 82, 0.15); }
 input[type='checkbox'], input[type='radio'] { width: 18px; height: 18px; accent-color: var(--fern); box-shadow: none; }
 textarea { min-height: 96px; resize: vertical; }

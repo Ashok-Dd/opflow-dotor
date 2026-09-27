@@ -52,13 +52,12 @@ export function SignInForm({ next, expired }: { next: string; expired: boolean }
       </label>
       <label className="field">
         <span>{t('Password')}</span>
-        <div style={{ position: 'relative' }}>
-          <input name="password" type={show ? 'text' : 'password'} required autoComplete="current-password" style={{ paddingRight: 64 }} />
+        <div className="pw">
+          <input name="password" type={show ? 'text' : 'password'} required autoComplete="current-password" />
           <button
             type="button"
             onClick={() => setShow((s) => !s)}
-            className="btn ghost small"
-            style={{ position: 'absolute', right: 6, top: 6, width: 'auto', margin: 0 }}
+            className="pw-toggle"
             aria-label={show ? t('Hide password') : t('Show password')}
           >
             {show ? t('Hide') : t('Show')}
