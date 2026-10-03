@@ -384,6 +384,7 @@ textarea { min-height: 96px; resize: vertical; }
 .brow .tk.em { background: var(--alarm-bg); color: var(--alarm); }
 .brow b { display: block; }
 .brow span { font-size: 13px; color: var(--ink-soft); }
+.brow span > span { display: block; margin-top: 2px; }
 
 /* calendar (leave) */
 .months { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
