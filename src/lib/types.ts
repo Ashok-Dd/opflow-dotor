@@ -209,6 +209,7 @@ export interface Prefs {
 export interface Devices {
   max: number;
   maxWeb: number;
+  counts?: { web: number; phones: number };
   items: { id: string; thisDevice: boolean; device: string; platform: string | null; signedInAt: string; lastUsedAt: string }[];
 }
 

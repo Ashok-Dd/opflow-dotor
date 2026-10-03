@@ -115,6 +115,7 @@
  "This page is not here": "ఈ పేజీ లేదు",
  "Turn on": "ఆన్ చేయండి",
  "Up to {0} phones and {1} computer at a time.": "ఒకేసారి {0} ఫోన్‌లు, {1} కంప్యూటర్ వరకు.",
+ "In use now: {0} of {1} phones, {2} of {3} computer.": "ఇప్పుడు వాడుకలో: {0}/{1} ఫోన్లు, {2}/{3} కంప్యూటర్.",
  "Use the OPD ID and password from the OPflow team.": "OPflow టీమ్ ఇచ్చిన OPD ID, పాస్‌వర్డ్ వాడండి.",
  "We could not load your OPD": "మీ OPD ని లోడ్ చేయలేకపోయాం",
  "What to do": "ఏం చేయాలి",

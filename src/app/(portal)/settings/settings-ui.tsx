@@ -102,6 +102,8 @@ export function DeviceList({ initial }: { initial: Devices }) {
       <h3>{t('Signed in on')}</h3>
       <p className="muted" style={{ marginTop: -6, fontSize: 13.5 }}>
         {t('Up to {0} phones and {1} computer at a time.', [initial.max, initial.maxWeb])}
+        {' '}
+        {t('In use now: {0} of {1} phones, {2} of {3} computer.', [list.filter((d) => d.platform !== 'web').length, initial.max, list.filter((d) => d.platform === 'web').length, initial.maxWeb])}
       </p>
       <div className="grid" style={{ gap: 8 }}>
         {list.map((d) => (
