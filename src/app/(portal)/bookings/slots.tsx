@@ -140,6 +140,7 @@ export function DaySlots({
                               <span className={`tk${b.emergency ? ' em' : ''}`}>{b.tokenLabel}</span>
                               <span style={{ minWidth: 0 }}>
                                 <b>{b.name}</b>
+                                {b.phone ? <span className="mono">{b.phone}</span> : null}
                                 <span>
                                   {[b.age != null ? t('{0} yrs', [b.age]) : null, b.gender ? t(cap1(b.gender)) : null, b.emergency ? t('Emergency') : t('Online'), b.changed ? t('Changed') : null]
                                     .filter(Boolean)

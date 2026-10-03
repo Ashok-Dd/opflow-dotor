@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 import { get } from '@/lib/api';
 import { addDays, dayLabel, istToday, longDate, people, shortDay, weekdayOf } from '@/lib/format';
@@ -7,6 +6,7 @@ import { getLang, serverT } from '@/lib/lang';
 import { portal } from '@/lib/portal';
 import type { BookingCounts, DayBooking, Leave, Week } from '@/lib/types';
 
+import { BookingsShell, NavLink, Results } from './nav';
 import { CancelDayButton, DaySlots } from './slots';
 
 export const metadata: Metadata = { title: 'Bookings' };
@@ -65,7 +65,7 @@ export default async function BookingsPage({ searchParams }: PageProps<'/booking
   const leave = onLeave(date);
 
   return (
-    <>
+    <BookingsShell>
       <header className="head">
         <div>
           <div className="kicker">{t('Next 14 days')}</div>
@@ -81,23 +81,24 @@ export default async function BookingsPage({ searchParams }: PageProps<'/booking
           const n = countOf.get(d) ?? 0;
           const off = n === 0 && (!worksOn(d) || onLeave(d));
           return (
-            <Link prefetch={false} key={d} href={`/bookings?date=${d}${filter !== 'all' ? `&f=${filter}` : ''}`} className={`day${off ? ' off' : ''}`} aria-current={d === date ? 'page' : undefined}>
+            <NavLink key={d} href={`/bookings?date=${d}${filter !== 'all' ? `&f=${filter}` : ''}`} className={`day${off ? ' off' : ''}`} current={d === date}>
               <small>{i === 0 ? t('Today') : shortDay(lang, d)}</small>
               <b>{Number(d.slice(8))}</b>
               <span>{onLeave(d) ? t('Leave') : off ? t('Off') : n}</span>
-            </Link>
+            </NavLink>
           );
         })}
       </nav>
 
       <div className="chips" style={{ margin: '12px 0 6px' }}>
         {FILTERS.map(([k, label]) => (
-          <Link prefetch={false} key={k} className="chip" href={`/bookings?date=${date}${k !== 'all' ? `&f=${k}` : ''}`} aria-current={filter === k ? 'page' : undefined}>
+          <NavLink key={k} className="chip" href={`/bookings?date=${date}${k !== 'all' ? `&f=${k}` : ''}`} current={filter === k}>
             {t(label)}
-          </Link>
+          </NavLink>
         ))}
       </div>
 
+      <Results>
       {leave ? (
         <div className="empty" style={{ marginTop: 14 }}>
           <b>{t('You are on leave')}</b>
@@ -121,6 +122,7 @@ export default async function BookingsPage({ searchParams }: PageProps<'/booking
           <DaySlots date={date} list={list} perHour={perHour} hospitals={hospitals.map((h) => ({ id: h.id, name: h.name }))} isToday={date === today} />
         </>
       )}
-    </>
+      </Results>
+    </BookingsShell>
   );
 }

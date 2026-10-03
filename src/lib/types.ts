@@ -101,6 +101,7 @@ export interface DayBooking {
   tokenLabel: string;
   emergency: boolean;
   name: string;
+  phone: string | null;
   age: number | null;
   gender: string | null;
   note: string;
@@ -122,6 +123,7 @@ export interface BookingDetail {
   token: number;
   tokenLabel: string;
   name: string;
+  phone: string | null;
   age: number | null;
   gender: string | null;
   note: string;

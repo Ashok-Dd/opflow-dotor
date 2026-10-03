@@ -93,6 +93,12 @@ export default async function BookingPage({ params }: PageProps<'/bookings/[id]'
           </div>
           <div className="card">
             <dl className="kv">
+              {b.phone ? (
+                <>
+                  <dt>{t('Phone')}</dt>
+                  <dd><a href={`tel:${b.phone}`} className="mono">{b.phone}</a></dd>
+                </>
+              ) : null}
               <dt>{t('Day')}</dt>
               <dd>{longDate(lang, b.sessionDate)}</dd>
               <dt>{t('Time')}</dt>
