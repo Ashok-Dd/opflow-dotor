@@ -1069,5 +1069,11 @@
  "{0} · Coming": "{0} · రావాల్సి ఉంది",
  "Please update OPflow": "దయచేసి OPflow ను అప్‌డేట్ చేయండి",
  "This version of the app is too old and cannot book or pay any more. Please install the latest OPflow. Your bookings are safe.": "ఈ యాప్ వెర్షన్ పాతది, ఇకపై బుక్ చేయలేదు, చెల్లించలేదు. దయచేసి కొత్త OPflow ను ఇన్‌స్టాల్ చేయండి. మీ బుకింగ్‌లు సురక్షితంగా ఉన్నాయి.",
- "Open OPflow on the web": "వెబ్‌లో OPflow తెరవండి"
+ "Open OPflow on the web": "వెబ్‌లో OPflow తెరవండి",
+ "Crop your photo": "మీ ఫోటోను క్రాప్ చేయండి",
+ "Move and zoom so your face is in the middle.": "మీ ముఖం మధ్యలో ఉండేలా జరపండి, జూమ్ చేయండి.",
+ "Use this photo": "ఈ ఫోటోను వాడండి",
+ "Your photo. Drag to move it.": "మీ ఫోటో. జరపడానికి లాగండి.",
+ "Zoom": "జూమ్",
+ "Cancel": "రద్దు"
 }

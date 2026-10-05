@@ -9,23 +9,7 @@ import { Icon } from '@/components/icons';
 import { OpLoader, OpLoadingScreen } from '@/components/op-loader';
 import { initials } from '@/lib/format';
 
-const LONG_SIDE = 1200;
-
-/** The picked photo as a JPEG no longer than 1200 px (turned the right way up), like the app's image picker. */
-async function shrink(file: File): Promise<Blob> {
-  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
-  const scale = Math.min(1, LONG_SIDE / Math.max(bmp.width, bmp.height));
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.round(bmp.width * scale);
-  canvas.height = Math.round(bmp.height * scale);
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('no canvas');
-  ctx.fillStyle = '#fff'; // a see-through PNG gets a white background, not black
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
-  bmp.close();
-  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('no blob'))), 'image/jpeg', 0.86));
-}
+import { CropDialog } from './crop-dialog';
 
 /** The doctor's photo with Change / Remove. The new photo shows once the API has made its sizes. */
 export function PhotoPicker({ name, photo }: { name: string; photo: string | null }) {
@@ -37,6 +21,7 @@ export function PhotoPicker({ name, photo }: { name: string; photo: string | nul
   const [pending, start] = useTransition();
   const [preview, setPreview] = useState<string | null>(null);
   const [waiting, setWaiting] = useState(false);
+  const [cropping, setCropping] = useState<File | null>(null);
   const alive = useRef(true);
 
   useEffect(() => {
@@ -65,14 +50,12 @@ export function PhotoPicker({ name, photo }: { name: string; photo: string | nul
     if (input.current) input.current.value = '';
     if (!file) return;
     if (!file.type.startsWith('image/')) return toast(t('Please choose a JPG, PNG or WebP photo.'), true);
+    setCropping(file); // the doctor frames it first
+  };
+
+  const upload = (blob: Blob) => {
+    setCropping(null);
     start(async () => {
-      let blob: Blob;
-      try {
-        blob = await shrink(file);
-      } catch {
-        toast(t('This photo could not be opened. Please choose another one.'), true);
-        return;
-      }
       const form = new FormData();
       form.set('photo', new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
       const r = await uploadPhoto(form);
@@ -119,6 +102,7 @@ export function PhotoPicker({ name, photo }: { name: string; photo: string | nul
         ) : null}
       </div>
       <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => pick(e.target.files?.[0])} />
+      {cropping ? <CropDialog file={cropping} onCancel={() => setCropping(null)} onDone={upload} /> : null}
       {dialog}
     </div>
   );
