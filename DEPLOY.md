@@ -20,8 +20,8 @@ Keep it private. The same value goes to Vercel **and** Render below.
 
    | Name | Value |
    |---|---|
-   | `DOCTOR_API_BASE_URL` | `https://opflow-backend.onrender.com` |
-   | `NEXT_PUBLIC_LIVE_URL` | `https://opflow-backend.onrender.com` |
+   | `DOCTOR_API_BASE_URL` | `https://backend.opflow.in` |
+   | `NEXT_PUBLIC_LIVE_URL` | `https://backend.opflow.in` |
    | `DOCTOR_WEB_KEY` | the secret from step 1 |
 
 3. **Deploy.** The address will be `https://opflow-doctor.vercel.app` (or the name Vercel shows; use that below).
